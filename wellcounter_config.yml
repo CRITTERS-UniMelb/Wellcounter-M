@@ -1,0 +1,45 @@
+motion:
+  analysis_duration: 3
+  max_search_distance: 20
+  min_trajectory_size: 5
+  trajectory_random_colors: false
+optimize:
+  area_from: 150
+  area_step: 50
+  area_to: 400
+  output_folder: C:/wellcounter/training_data_for_MEE
+  threshold_from: 8
+  threshold_step: 8
+  threshold_to: 24
+  training_path: C:/wellcounter/training_data_for_MEE
+outputs:
+  motion: true
+  particle_detection: true
+particle_detection:
+  background_is_dark: true
+  default_particle_area: 200
+  search_radius_factor: 2
+  filter_by_shape: false
+  microorganism_blur: 5
+  microorganism_threshold_min: 4
+  microorganism_threshold_max: 100
+  min_microorganism_area: 100
+  max_microorganism_area: 676.500
+  shape_min_eccentricity: 0.215
+  shape_max_eccentricity: 0.978
+  shape_min_solidity: 0.809
+  shape_max_solidity: 0.987
+  shape_min_aspectratio: 0.277
+  shape_max_aspectratio: 4.0
+  shape_min_perimeter: 20  
+  shape_max_perimeter: 140 
+  shape_min_feret: 9  
+  shape_max_feret: 60 
+  max_majoraxis: 100 
+  min_axisratio: 0.001 
+  max_axisratio: 10 
+
+masks:
+  well_mask: true
+  bubble_mask: true
+  track_mask: true
