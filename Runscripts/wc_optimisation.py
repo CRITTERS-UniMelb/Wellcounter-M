@@ -46,7 +46,7 @@ current_date = date.today().strftime("%Y%m%d")
 # Set up logging
 logging.basicConfig(filename=f'optimize_imaging_parameters_{current_date}_logfile.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
-def read_config(config_path="Code/wellcounter_config.yml"):
+def read_config(config_path="wellcounter_config.yml"):
     """
     Function to read the config file.
     """
@@ -58,7 +58,7 @@ def read_config(config_path="Code/wellcounter_config.yml"):
         logging.error(f"Error reading config file: {e}")
         raise
 
-def write_config(config, config_path="Code/wellcounter_config.yml"):
+def write_config(config, config_path="wellcounter_config.yml"):
     """
     Function to write the config file.
     """
@@ -69,7 +69,7 @@ def write_config(config, config_path="Code/wellcounter_config.yml"):
         logging.error(f"Error writing config file: {e}")
         raise
 
-def backup_config(config_path="Code/wellcounter_config.yml"):
+def backup_config(config_path="wellcounter_config.yml"):
     try:
         config = read_config(config_path)
         # Open the temporary file in text mode
@@ -81,7 +81,7 @@ def backup_config(config_path="Code/wellcounter_config.yml"):
         raise
 
 
-def restore_config(backup_file, config_path="Code/wellcounter_config.yml"):
+def restore_config(backup_file, config_path="wellcounter_config.yml"):
     try:
         shutil.copy(backup_file, config_path)
         os.remove(backup_file)
@@ -229,7 +229,7 @@ def evaluate_imaging_parameters(training_path='E:/'):
         logging.error(f"Error in evaluate_imaging_parameters: {e}")
         raise
     
-def batch_optimizer(config_path="Code/wellcounter_config.yml"):
+def batch_optimizer(config_path="wellcounter_config.yml"):
     
     """
     Optimizes imaging parameters.
