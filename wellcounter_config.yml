@@ -1,14 +1,6 @@
-optimize:
-  area_from: 150
-  area_step: 50
-  area_to: 400
-  output_folder: C:/wellcounter/training_data_for_MEE
-  threshold_from: 8
-  threshold_step: 8
-  threshold_to: 24
-  training_path: C:/wellcounter/training_data_for_MEE
 outputs:
   particle_detection: true
+
 particle_detection:
   background_is_dark: true
   default_particle_area: 200
@@ -37,3 +29,14 @@ masks:
   well_mask: true
   bubble_mask: true
   track_mask: true
+
+optimize:
+  area_from: 150
+  area_step: 50
+  area_to: 400
+  output_folder: C:/wellcounter/training_data_for_MEE
+  threshold_from: 8
+  threshold_step: 8
+  threshold_to: 24
+  training_path: C:/wellcounter/training_data_for_MEE
+  
