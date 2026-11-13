@@ -13,7 +13,7 @@ The general code structure and image manipulation algorithms originated from thi
 Wellcounter-M is written in Python and should be installed by creating a Conda environment:
 
 ```         
-conda env create -f Code/wellcounterM.yml
+conda env create -f wellcounterM.yml
 conda activate wellcounterM
 ```
 
