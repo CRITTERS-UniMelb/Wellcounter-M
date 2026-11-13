@@ -1,4 +1,4 @@
-name: wellcount6_pi
+name: wellcounterM
 channels:
   - conda-forge
   - defaults
@@ -18,4 +18,4 @@ dependencies:
   - gst-plugins-ugly
   - gst-plugins-bad
   - pyyaml
-prefix: C:\Users\.conda\envs\wellcount6_pi
+prefix: C:\Users\.conda\envs\wellcounterM
