@@ -20,8 +20,6 @@ To use this script, follow these steps:
     activate the required conda environment by "conda activate wellcount6"
     in te wellcount6 env, type "python wc_analyze_one_sample.py"
 
-Author: Claus-Peter Stelzer
-Date: 2025-02-07
  
 """
 
@@ -30,9 +28,8 @@ import os
 import wellcounterM
 
 # Enter the path to the to be analyzed
-#data_dir = "/Users/saoirsekelleher/Documents/Research/QAEco/Paramecium/critter_counting/videos/"  # Location of video file
-data_dir = "C:\\Users\\estern\\Documents\\critter_counting\\videos"  # Location of video file
-video_file = "2025_02_14_12_23_Group400_Rep1_Col2_Well82.avi"
+data_dir = "SampleVideos"  # Location of video file
+video_file = "2025_05_21_14_45_Temp27_Conc010_Col2_Well2.avi"
 video_path = os.path.join(data_dir, video_file)
 
 # Calculate avg. number of organisms based on three frames of the video
