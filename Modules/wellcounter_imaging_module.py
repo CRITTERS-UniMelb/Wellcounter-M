@@ -45,7 +45,7 @@ def extract_frame(video_path, delay=0):
         delay (int): seconds since the start of the movie.
 
     Returns:
-        ndarray: The extracted frame as an image array.
+        frame: The extracted frame as an image array.
     
     """
         
@@ -146,8 +146,15 @@ def mask_well_area(image, first_frame):
     This mask will be used to set all pixels outside the well to 0.
     
     Note, this function is called only if the wellcounter_config.yml file is set to:
-        well_mask = true
+        mask > well_mask > true
         
+    Args:
+        image (ndarray): Well image used to create the mask
+        first_frame (ndarray): First frame of a video, used to draw the well mask on
+
+    Returns:
+        mask: A binary mask of the identified well area.
+        first_frame: The first frame of the video with the mask contour drawn on it.
     """
     
     # Convert image to grayscale if it is not already
@@ -174,11 +181,20 @@ def mask_well_area(image, first_frame):
 def identify_bubbles(mean_frame, well_mask, first_frame):
     """    
     This function identifies suspected bubbles in the video. 
-    It returns a table of the possible bubbles and a mask of the well.
+    It returns a table of the possible bubbles and a mask of the well to block the bubble areas.
     
     Note, this function is only applied if the wellcounter_config.yml file is set to:
         masks > bubble_mask > True
+    
+    Args:
+        mean_frame (ndarray): Mean frame of the video, calculated in process_summary_frames
+        well_mask (ndarray): Binary well mask, calculated in mask_well_area
+        first_frame (ndarray): First frame of a video, used to draw the bubble mask on
 
+    Returns:
+        bubble_table: A table of the bubbles identified in the image.
+        bubble_mask: A binary mask of the identified bubbles.
+        first_frame: The first frame of the video with the bubble contours drawn on it.
     """
 
     # Apply well mask
@@ -188,13 +204,13 @@ def identify_bubbles(mean_frame, well_mask, first_frame):
     mean_blur = cv2.medianBlur(mean_masked, 7)
 
     # Threshold mean frame
-    _,mean_thresh = cv2.threshold(mean_blur, 200, 255, cv2.THRESH_BINARY)
+    _, mean_thresh = cv2.threshold(mean_blur, 200, 255, cv2.THRESH_BINARY)
 
     # Dilate bubbles
     kernal = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
     mean_dilate = cv2.dilate(mean_thresh, kernal, iterations = 5)
 
-    # Find contours, check circularity
+    # Find contours and check circularity to confirm bubble
     bubble_contours, _ = cv2.findContours(mean_dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     valid_bubbles = []
     for cnt in bubble_contours:
@@ -202,7 +218,6 @@ def identify_bubbles(mean_frame, well_mask, first_frame):
         measurements = calculate_measurements(cnt)
         if circularity > 0.5:
             valid_bubbles.append(cnt)
-
     
     # Initialize an empty DataFrame for bubble measurements
     columns = ["X", "Y", "area", "perimeter", "orientation", "aspect_ratio", "solidity", "eccentricity",
