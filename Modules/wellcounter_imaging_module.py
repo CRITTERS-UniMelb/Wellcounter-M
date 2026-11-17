@@ -11,7 +11,6 @@ This code has been heavily modified as part of the CRITTERS project.
 
 import math
 import os
-import string
 
 import cv2
 import numpy as np
@@ -90,7 +89,7 @@ def extract_frame(video_path, delay=0):
 
 def process_full_video(video_path):
     """
-    This function isolates the minimum, maximum, and mean frames from the video.
+    This function isolates the minimum, maximum, and mean for each pixel across the full video.
     
     Args:
         video_path: Filepath for video to be processed.
