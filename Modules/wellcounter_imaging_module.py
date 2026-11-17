@@ -396,23 +396,11 @@ def calculate_measurements(contour):
 def analyze_microorganisms(image):
     
     """
-    This function identifies microorganisms in a subtracted image (input) based 
-    on parameters set in the wellcounter_config.yml file (> particle_detection), 
-    specifically the parameters 'microorganism_threshold' and 'min_microorganism_area'
+    This function identifies microorganisms in a background-subtracted image (input) based 
+    on parameters set in the wellcounter_config.yml file (> particle_detection).
     
     If the parameter 'filter_by_shape' in the config file is set 'True', an optional, 
-    additional filtering of the particles can done. Currently, we do not use this feature 
-    in the WELLCOUNTER.
-    
-    Identifies microorganisms in a subtracted image based on specified parameters.
-
-    This function processes an image to detect microorganisms using parameters 
-    defined in the `wellcounter_config.yml` file, specifically the parameters 
-    'microorganism_threshold' and 'min_microorganism_area'. The detection involves thresholding 
-    and contour finding, followed by optional shape-based filtering of detected particles.  
-    If the parameter 'filter_by_shape' in the config file is set 'True', an optional, 
-    additional filtering of the particles can done. Currently, this feature is not used
-    in the WELLCOUNTER. 
+    additional filtering of the particles is performed. 
      
     The detected microorganisms are characterized by various morphological measurements.
 
@@ -425,22 +413,18 @@ def analyze_microorganisms(image):
             including coordinates (X, Y), area, perimeter, orientation, aspect ratio, 
             solidity, eccentricity, and feret diameter.
             - ndarray: A binary image where detected microorganisms are marked.
-    
     """
         
+    # Load configuration with detetion parameters
     config=read_config()
     particle_detection_params = config['particle_detection']
     
-    #print("Now within analyze_microorganisms...")
-    #print("Using pixel threshold: ", particle_detection_params['microorganism_threshold'])
-    #print("Using particle area: ", particle_detection_params['min_microorganism_area'])
-    
     # Apply preprocessing operations for microorganism detection\
-    #_, threshold = cv2.threshold(image, particle_detection_params['microorganism_threshold'], 255, cv2.THRESH_BINARY)
     threshold = cv2.inRange(image, particle_detection_params['microorganism_threshold_min'], particle_detection_params['microorganism_threshold_max'])
     threshold = cv2.medianBlur(threshold, particle_detection_params['microorganism_blur'])
-    contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+    # Detect candidate particle contours in image, retaining all above the minimum area
+    contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     valid_contours = [cnt for cnt in contours if cv2.contourArea(cnt) > particle_detection_params['min_microorganism_area']]
     
     # Create an empty grayscale image with the same dimensions as the original image
@@ -453,14 +437,15 @@ def analyze_microorganisms(image):
                "feret_diameter", "bounding_x", "bounding_y", "bounding_w", "bounding_h"]
     df = pd.DataFrame(columns=columns)
     
+    # Calculate measurements for each candidate contour
     if valid_contours:
         for contour in valid_contours:
             measurements = calculate_measurements(contour)
             if measurements:
                 df.loc[len(df)] = measurements  # Add measurements as a new row
     
+    # Filter candidate particles based on the limits set in the config file
     if particle_detection_params['filter_by_shape']:
-        # Filter measurements based 0.5% to 99.5% quantiles of true positive particles in the training data
         df = df[(df['eccentricity'] >= particle_detection_params['shape_min_eccentricity']) & 
                 (df['eccentricity'] <= particle_detection_params['shape_max_eccentricity']) &
                 (df['solidity'] >= particle_detection_params['shape_min_solidity']) & 
@@ -480,7 +465,8 @@ def analyze_microorganisms(image):
     # Sort the DataFrame based on ascending Y and then X values
     df = df.sort_values(by=['Y', 'X'], ascending=[True, True])
 
-    return df, binary_image  # Return the DataFrame and binary image of detected microorganisms
+    # Return the DataFrame and binary image of detected microorganisms
+    return df, binary_image  
 
 
 def label_particles(image, table_of_particles):
