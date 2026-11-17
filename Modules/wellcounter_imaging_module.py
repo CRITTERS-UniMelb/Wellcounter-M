@@ -11,6 +11,7 @@ This code has been heavily modified as part of the CRITTERS project.
 
 import math
 import os
+import sys
 
 import cv2
 import numpy as np
@@ -89,13 +90,12 @@ def extract_frame(video_path, delay=0):
 
 def process_summary_frames(video_path):
     """
-    This function calculates the minimum, maximum, and mean value for each pixel across the full video.
+    This function calculates the maximum, mean, and median value for each pixel across the full video.
     
     Args:
         video_path: Filepath for video to be processed.
 
     Returns:
-        min_frame: Image with the minimum value in any frame of the video
         max_frame: Image with the maximum value in any frame of the video
         mean_frame: Image with the average value in any frame of the video
         median_frame: Image with the median value in any frame of the video
@@ -117,7 +117,6 @@ def process_summary_frames(video_path):
 
     # Get min, max, and mean frames (using one every 10th second)
     max_frame = first_image
-    min_frame = first_image
     
     # Load all frames
     frames = []
@@ -125,7 +124,6 @@ def process_summary_frames(video_path):
         cap.set(cv2.CAP_PROP_POS_FRAMES, fid)
         _, frame = cap.read()
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        min_frame = cv2.min(min_frame, frame)
         max_frame = cv2.max(max_frame, frame)
         frames.append(frame)
 
@@ -136,7 +134,7 @@ def process_summary_frames(video_path):
     median_frame = np.median(frames, axis=0).astype(dtype=np.uint8)    
     mean_frame = np.mean(frames, axis=0).astype(dtype=np.uint8)
 
-    return min_frame, max_frame, mean_frame, median_frame
+    return max_frame, mean_frame, median_frame
 
 
 def mask_well_area(image, first_frame, use_mask = True):
@@ -514,7 +512,7 @@ def label_particles(image, table_of_particles):
     return labeled_image
 
 
-def image_analysis_of_frame(video_path, frame_id, well_mask, track_mask, foreground_mask):
+def image_analysis_of_frame(video_path, frame_id, well_mask, track_mask, background_mask):
 
     # Read config
     config=read_config()      
@@ -528,7 +526,7 @@ def image_analysis_of_frame(video_path, frame_id, well_mask, track_mask, foregro
     masked_image = cv2.bitwise_and(masked_image, masked_image, mask = track_mask)
 
     # Subtract background
-    subtract_image = cv2.subtract(masked_image, foreground_mask)
+    subtract_image = cv2.subtract(masked_image, background_mask)
     
     # Analyze microorganisms 
     table_of_particles, _ = analyze_microorganisms(subtract_image)
@@ -585,7 +583,7 @@ def count_particles(video_path):
     1. The function opens the video file and calculates its duration.
     2. It determines three key frames for analysis: the beginning, middle, and near the end of the video.
     3. Each of these frames is analyzed to detect and count particles.
-    4. The function computes the average number of particles, the median size of particles, and the spatial NNI.
+    4. The function computes the average number of particles and the median size of particles.
     5. Results are printed and returned in a summary data frame.
     
     """
@@ -599,7 +597,7 @@ def count_particles(video_path):
     # Check if the video file was opened successfully
     if not video.isOpened():
         print("Error: Could not open video file.")
-        exit()
+        sys.exit()
     
     # Calculate duration of the video
     total_frames = video.get(cv2.CAP_PROP_FRAME_COUNT)
@@ -617,7 +615,7 @@ def count_particles(video_path):
     first_frame = cv2.cvtColor(first_frame, cv2.COLOR_GRAY2BGR)
 
     # Process video to get minimum, maximum, and mean frames
-    min_frame, max_frame, mean_frame, median_frame = process_summary_frames(video_path)
+    max_frame, mean_frame, median_frame = process_summary_frames(video_path)
 
     # Get well mask
     well_mask, first_frame = mask_well_area(median_frame, first_frame, use_mask = mask_params['well_mask'])
