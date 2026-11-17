@@ -312,9 +312,7 @@ def mask_tracks(median_frame, max_frame, bubble_mask, first_frame, use_mask = Tr
 
 def calculate_measurements(contour):
     """
-        
-    Calculates various particle measurements for a given contour.
-
+    Calculates various particle measurements for a given candidate particle.
     This function calculates properties including the area, perimeter, orientation, aspect ratio, 
     solidity, eccentricity, and feret diameter for the provided contour.
 
@@ -324,8 +322,6 @@ def calculate_measurements(contour):
     Returns:
         list: A list of measurements including X, Y coordinates, area, perimeter, 
         orientation, aspect ratio, solidity, eccentricity, and feret diameter.
-   
-
     """
     # Calculate measurements for a single contour
     M = cv2.moments(contour)
@@ -374,7 +370,7 @@ def calculate_measurements(contour):
     solidity = area / hull_area if hull_area != 0 else np.nan
     
     # Feret Diameter
-    (center_EC, radius_EC) = cv2.minEnclosingCircle(np.array(contour))
+    (_, radius_EC) = cv2.minEnclosingCircle(np.array(contour))
     feret_diameter = 2 * radius_EC
 
     return {
@@ -547,7 +543,7 @@ def image_analysis_of_frame(video_path, frame_id, well_mask, track_mask, foregro
     subtract_image = cv2.subtract(masked_image, foreground_mask)
     
     # Analyze microorganisms 
-    table_of_particles, binary_image = analyze_microorganisms(subtract_image)
+    table_of_particles, _ = analyze_microorganisms(subtract_image)
     
     if output_params['particle_detection']:
         
