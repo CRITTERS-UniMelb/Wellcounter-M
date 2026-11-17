@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 """
-Script: wc_analyze_one_sample
+Script: wc_analyze_one_video
 
 This software is part of the following publication:
 "Wellcounter: Automated High-Throughput Phenotyping for Aquatic Microinvertebrates"
@@ -27,7 +26,8 @@ Date: 2025-02-07
 """
 
 import os
-import wellcounter_imaging_module as wim
+
+import wellcounterM
 
 # Enter the path to the to be analyzed
 #data_dir = "/Users/saoirsekelleher/Documents/Research/QAEco/Paramecium/critter_counting/videos/"  # Location of video file
@@ -36,7 +36,7 @@ video_file = "2025_02_14_12_23_Group400_Rep1_Col2_Well82.avi"
 video_path = os.path.join(data_dir, video_file)
 
 # Calculate avg. number of organisms based on three frames of the video
-count_df = wim.count_particles(video_path)     
+count_df = wellcounterM.count_particles(video_path)
 
 # Print the results
 print("Analysis of ", video_file, "complete:")
