@@ -240,7 +240,27 @@ def identify_bubbles(mean_frame, well_mask, first_frame):
     return bubble_table, bubble_mask, first_frame
 
 
-def image_subtraction_from_video(median_frame, max_frame, bubble_mask, first_frame):
+def mask_tracks(median_frame, max_frame, bubble_mask, first_frame):
+    """    
+    This function takes the medium and maximum frames of the video, plus the bubble mask, to
+    create 'tracks' of where the paracemium move throughout the video. The area outside the tracks
+    is then masked in the median frame to create a background mask, which is later subtracted to isolate paramecium
+    
+    Note, this function is only applied if the wellcounter_config.yml file is set to:
+        masks > track_mask > True
+    
+    Args:
+        median_frame (ndarray): Median frame of the video, calculated in process_summary_frames
+        maximum_frame (ndarray): Maximum frame of the video, calculated in process_summary_frames
+        bubble_mask (ndarray): Binary bubble mask, calculated in identify bubbles
+        first_frame (ndarray): First frame of a video, used to draw the tracks on
+
+    Returns:
+        foreground_mask: A table of the bubbles identified in the image.
+        track_mask: A binary mask of the identified tracks (plus well area/bubbles if in config).
+        track_image: A binary mask of the identified bubbles.
+        first_frame: The first frame of the video with the track contours drawn on it.
+    """
 
     # Get tracks by subtracting median from max
     range_frame = cv2.subtract(max_frame, median_frame)
@@ -265,7 +285,7 @@ def image_subtraction_from_video(median_frame, max_frame, bubble_mask, first_fra
         if cv2.arcLength(cnt, True) > 150:
             valid_tracks.append(cnt)
 
-    # Draw track contours on max_image
+    # Draw track contours on max_image and first_frame
     track_image = cv2.cvtColor(max_frame, cv2.COLOR_GRAY2BGR)
     cv2.drawContours(track_image, valid_tracks, -1, (0,255,0), thickness=1)
     cv2.drawContours(first_frame, valid_tracks, -1, (255,0,255), thickness=1)
