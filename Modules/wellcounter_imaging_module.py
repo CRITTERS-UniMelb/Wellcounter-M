@@ -139,7 +139,7 @@ def process_summary_frames(video_path):
     return min_frame, max_frame, mean_frame, median_frame
 
 
-def mask_well_area(image, first_frame):
+def mask_well_area(image, first_frame, use_mask = True):
     
     """
     This function creates a mask of the true well area, ignoring the walls.
@@ -151,6 +151,7 @@ def mask_well_area(image, first_frame):
     Args:
         image (ndarray): Well image used to create the mask
         first_frame (ndarray): First frame of a video, used to draw the well mask on
+        use_mask (binary): Whether or not to calculate well mask
 
     Returns:
         mask: A binary mask of the identified well area.
@@ -168,17 +169,20 @@ def mask_well_area(image, first_frame):
     contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     largest_contour = max(contours, key=cv2.contourArea)
 
-    # Create mask by filling contour on a black background
-    mask = np.zeros_like(image)
-    cv2.drawContours(mask, [largest_contour], 0, 1, -1)
-
-    # Draw the well contour on the first frame for verification
-    cv2.drawContours(first_frame, [largest_contour], 0, (0,0,255), 4)
+    # If using, create mask by filling contour on a black background
+    
+    if use_mask:
+        mask = np.zeros_like(image)
+        cv2.drawContours(mask, [largest_contour], 0, 1, -1)
+        # Draw the well contour on the first frame for verification
+        cv2.drawContours(first_frame, [largest_contour], 0, (0,0,255), 4)
+    else:
+        mask = np.ones_like(image)
 
     return mask, first_frame
 
 
-def mask_bubbles(mean_frame, well_mask, first_frame):
+def mask_bubbles(mean_frame, well_mask, first_frame, use_mask = True):
     """    
     This function identifies suspected bubbles in the video. 
     It returns a table of the possible bubbles and a mask of the well to block the bubble areas.
