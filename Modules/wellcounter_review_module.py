@@ -386,3 +386,72 @@ def detect_false_negatives(video_path, first_frame_path, categorized_data):
     fn_df['area'] = 10
     
     return pd.concat([categorized_data, fn_df], ignore_index=True)
+
+def draw_grid(img, grid_shape, color=(0, 255, 0), thickness=2):
+    h, w, _ = img.shape
+    rows, cols = grid_shape
+    dy, dx = h / rows, w / cols
+    overlay = np.zeros_like(img)
+    
+    # draw vertical lines
+    for x in np.linspace(start=dx, stop=w-dx, num=cols-1):
+        x = int(round(x))
+        cv2.line(overlay, (x, 0), (x, h), color=color, thickness=thickness)
+
+    # draw horizontal lines
+    for y in np.linspace(start=dy, stop=h-dy, num=rows-1):
+        y = int(round(y))
+        cv2.line(overlay, (0, y), (w, y), color=color, thickness=thickness)
+
+    for col_num in range(cols):
+        x = int((dx/2)+dx*col_num)
+        x_lab = range(30)[col_num]
+        for row_num in range(rows):
+            y = int((dy/2)+dy*row_num)
+            y_lab = string.ascii_uppercase[row_num]
+            cv2.putText(overlay, y_lab+str(x_lab), (x,y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,255,0),2,cv2.LINE_AA)
+
+    cv2.addWeighted(overlay, 0.35, img, 0.65, 0, img)
+
+    return img
+
+
+def add_grid_to_video(video_path):
+
+    # Get output directory
+    main_dir = os.path.dirname(video_path)
+        
+    # Extract the video filename without the extension
+    filename = os.path.splitext(os.path.basename(video_path))[0]
+        
+    # Create an output path with _grid appended
+    output_path = os.path.join(main_dir, f'{filename}_grid.mp4')
+        
+    # Open the video file
+    cap = cv2.VideoCapture(video_path)
+ 
+    # Get frame width and height
+    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+
+    # Define the codec and create VideoWriter object
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    out = cv2.VideoWriter(output_path, fourcc, fps, (frame_width, frame_height), True)
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            print("End of video or error occurred.")
+            break
+        
+        # Add grid and write the frame to the output video file
+        frame_grid = draw_grid(frame, (8,14))
+        out.write(frame_grid)
+ 
+    # Release everything
+    cap.release()
+    out.release()
+
+    out_message = "Grid added to file at" + output_path
+
+    return out_message
