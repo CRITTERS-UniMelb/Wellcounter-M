@@ -274,11 +274,10 @@ def image_subtraction_from_video(median_frame, max_frame, bubble_mask, first_fra
     track_mask = np.zeros_like(median_frame)
     cv2.drawContours(track_mask, valid_tracks, -1, (255), thickness=cv2.FILLED)
 
-    # Get foreground mask
-    foreground_mask = cv2.bitwise_and(median_frame, median_frame, mask = track_mask)
+    # Get background mask
+    background_mask = cv2.bitwise_and(median_frame, median_frame, mask = track_mask)
 
-
-    return foreground_mask, track_mask, track_image, first_frame 
+    return background_mask, track_mask, track_image, first_frame 
 
 
 def calculate_measurements(contour):
