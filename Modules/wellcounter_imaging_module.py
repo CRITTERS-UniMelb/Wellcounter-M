@@ -595,7 +595,10 @@ def count_particles(video_path):
     5. Results are printed and returned in a summary data frame.
     
     """
-          
+    # Load config
+    config=read_config()
+    mask_params = config['masks']
+
     # Calculate the duration of the video in seconds
     video = cv2.VideoCapture(video_path)
     
@@ -623,13 +626,13 @@ def count_particles(video_path):
     min_frame, max_frame, mean_frame, median_frame = process_summary_frames(video_path)
 
     # Get well mask
-    well_mask, first_frame = mask_well_area(median_frame, first_frame)
+    well_mask, first_frame = mask_well_area(median_frame, first_frame, use_mask = mask_params['well_mask'])
 
     # Get bubble mask
-    bubble_table, bubble_mask, first_frame = mask_bubbles(mean_frame, well_mask, first_frame)
+    bubble_table, bubble_mask, first_frame = mask_bubbles(mean_frame, well_mask, first_frame, use_mask = mask_params['bubble_mask'])
 
     # Get background mask and tracks
-    background_mask, track_mask, track_image, first_frame = mask_tracks(median_frame, max_frame, bubble_mask, first_frame)
+    background_mask, track_mask, track_image, first_frame = mask_tracks(median_frame, max_frame, bubble_mask, first_frame, use_mask = mask_params['track_mask'])
 
     # Perform analysis on three different frames (beginning, middle and end of video)    
     table_of_particles1 = image_analysis_of_frame(video_path, frame1, well_mask, track_mask, background_mask)
