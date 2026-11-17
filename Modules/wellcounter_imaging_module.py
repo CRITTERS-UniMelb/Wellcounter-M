@@ -9,14 +9,15 @@ Original code based on that published in "Wellcounter: Automated High-Throughput
 This code has been heavily modified as part of the CRITTERS project.
 """
 
+import math
+import os
+import string
 
 import cv2
 import numpy as np
 import pandas as pd
-import os
 import yaml
-import math
-import string
+
 
 # Function to draw grid
 def draw_grid(img, grid_shape, color=(0, 255, 0), thickness=2):
