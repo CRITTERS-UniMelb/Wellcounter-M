@@ -23,7 +23,7 @@ def read_config(config_path="wellcounter_config.yml"):
     """
     Helper-function to read the config file.
     """
-    
+
     try:
         with open(config_path, "r") as config_file:
             config = yaml.load(config_file, Loader=yaml.FullLoader)
@@ -146,11 +146,11 @@ def calculate_measurements(contour):
         
     Calculates various particle measurements for a given contour.
 
-    This function calculates properties such as the area, perimeter, orientation, aspect ratio, 
+    This function calculates properties including the area, perimeter, orientation, aspect ratio, 
     solidity, eccentricity, and feret diameter for the provided contour.
 
     Args:
-        contour (ndarray): A contour of a detected particle.
+        contour (ndarray): A contour of a detected candidate particle.
 
     Returns:
         list: A list of measurements including X, Y coordinates, area, perimeter, 
