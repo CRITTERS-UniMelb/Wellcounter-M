@@ -190,6 +190,7 @@ def mask_bubbles(mean_frame, well_mask, first_frame):
         mean_frame (ndarray): Mean frame of the video, calculated in process_summary_frames
         well_mask (ndarray): Binary well mask, calculated in mask_well_area
         first_frame (ndarray): First frame of a video, used to draw the bubble mask on
+        use_mask (binary): Whether or not to calculate bubble mask.
 
     Returns:
         bubble_table: A table of the bubbles identified in the image.
@@ -232,15 +233,15 @@ def mask_bubbles(mean_frame, well_mask, first_frame):
 
     # Create bubble mask
     bubble_mask = np.ones_like(mean_frame)
-    cv2.drawContours(bubble_mask, valid_bubbles, -1, (0), thickness=cv2.FILLED)
-
-    # Annotate first frame
-    cv2.drawContours(first_frame, valid_bubbles, -1, (255,255,0), 3)
+    if use_mask:
+        cv2.drawContours(bubble_mask, valid_bubbles, -1, (0), thickness=cv2.FILLED)
+        # Annotate first frame
+        cv2.drawContours(first_frame, valid_bubbles, -1, (255,255,0), 3)
 
     return bubble_table, bubble_mask, first_frame
 
 
-def mask_tracks(median_frame, max_frame, bubble_mask, first_frame):
+def mask_tracks(median_frame, max_frame, bubble_mask, first_frame, use_mask = True):
     """    
     This function takes the medium and maximum frames of the video, plus the bubble mask, to
     create 'tracks' of where the paracemium move throughout the video. The area outside the tracks
@@ -254,11 +255,12 @@ def mask_tracks(median_frame, max_frame, bubble_mask, first_frame):
         maximum_frame (ndarray): Maximum frame of the video, calculated in process_summary_frames
         bubble_mask (ndarray): Binary bubble mask, calculated in identify bubbles
         first_frame (ndarray): First frame of a video, used to draw the tracks on
+        use_mask (binary): Whether or not to use the tracks to mask the image
 
     Returns:
         foreground_mask: A table of the bubbles identified in the image.
         track_mask: A binary mask of the identified tracks (plus well area/bubbles if in config).
-        track_image: A binary mask of the identified bubbles.
+        track_image: Image including the full paramecium tracks throughout the video
         first_frame: The first frame of the video with the track contours drawn on it.
     """
 
@@ -271,7 +273,7 @@ def mask_tracks(median_frame, max_frame, bubble_mask, first_frame):
     # Apply bilateral filter
     range_blur = cv2.bilateralFilter(range_filtered, 5, 150, 150)
 
-    # Apply automatic threshold
+    # Apply automatic thresholding
     _,range_thresh = cv2.threshold(range_blur, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
 
     # Apply dilation
@@ -291,8 +293,12 @@ def mask_tracks(median_frame, max_frame, bubble_mask, first_frame):
     cv2.drawContours(first_frame, valid_tracks, -1, (255,0,255), thickness=1)
 
     # Create track mask
-    track_mask = np.zeros_like(median_frame)
-    cv2.drawContours(track_mask, valid_tracks, -1, (255), thickness=cv2.FILLED)
+    if use_mask:
+        track_mask = np.zeros_like(median_frame)
+        cv2.drawContours(track_mask, valid_tracks, -1, (255), thickness=cv2.FILLED)
+    else:
+        track_mask = np.ones_like(median_frame)
+        track_mask = cv2.bitwise_and(track_mask, track_mask, mask = bubble_mask)
 
     # Get background mask
     background_mask = cv2.bitwise_and(median_frame, median_frame, mask = track_mask)
