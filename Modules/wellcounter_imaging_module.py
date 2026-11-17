@@ -139,93 +139,6 @@ def process_summary_frames(video_path):
     return min_frame, max_frame, mean_frame, median_frame
 
 
-def calculate_measurements(contour):
-    """
-        
-    Calculates various particle measurements for a given contour.
-
-    This function calculates properties including the area, perimeter, orientation, aspect ratio, 
-    solidity, eccentricity, and feret diameter for the provided contour.
-
-    Args:
-        contour (ndarray): A contour of a detected candidate particle.
-
-    Returns:
-        list: A list of measurements including X, Y coordinates, area, perimeter, 
-        orientation, aspect ratio, solidity, eccentricity, and feret diameter.
-   
-
-    """
-    # Calculate measurements for a single contour
-    M = cv2.moments(contour)
-    
-    if M["m00"] == 0:
-        return None  # Avoid division by zero
-    
-    # Centroid coordinates, converted to integers
-    cx = int(M["m10"] / M["m00"])
-    cy = int(M["m01"] / M["m00"])
-    
-    # Area and perimeter
-    area = cv2.contourArea(contour)
-    perimeter = cv2.arcLength(contour, True)
-    
-    try:
-        # Ellipse fitting
-        ellipse = cv2.fitEllipse(contour)
-        orientation = ellipse[2]
-        # Calculate eccentricity
-        minor_axis = min(ellipse[1])
-        major_axis = max(ellipse[1])
-        eccentricity = np.sqrt(1 - (minor_axis ** 2) / (major_axis ** 2))
-        axis_ratio = major_axis / minor_axis 
-    except cv2.error as e:
-        # Handling the specific error for insufficient points
-        if "Incorrect size of input array" in str(e):
-            orientation = np.nan
-            eccentricity = np.nan
-            axis_ratio = np.nan
-        else:
-            raise  # Re-raise the exception if it's not the expected one
-    
-    # Aspect ratio of bounding rectangle
-    x, y, w, h = cv2.boundingRect(contour)
-    if (h == 0):
-        aspect_ratio = np.nan
-    elif (w >= h):
-        aspect_ratio = float(w) / h
-    elif (w < h):
-        aspect_ratio = float(h) / w
-
-    # Solidity
-    hull = cv2.convexHull(contour)
-    hull_area = cv2.contourArea(hull)
-    solidity = area / hull_area if hull_area != 0 else np.nan
-    
-    # Feret Diameter
-    (center_EC, radius_EC) = cv2.minEnclosingCircle(np.array(contour))
-    feret_diameter = 2 * radius_EC
-
-    return {
-        'X': cx,
-        'Y': cy,
-        'area': area,
-        'perimeter': perimeter,
-        'orientation': orientation,
-        'aspect_ratio': aspect_ratio,
-        'solidity': solidity,
-        'eccentricity': eccentricity,
-        'feret_diameter': feret_diameter,
-        'bounding_x': x,
-        'bounding_y': y,
-        'bounding_w': w,
-        'bounding_h': h, 
-        'minor_axis': minor_axis, 
-        'major_axis': major_axis, 
-        'axis_ratio': axis_ratio 
-    }
-
-
 def mask_well_area(image, first_frame):
     
     """
@@ -313,6 +226,134 @@ def identify_bubbles(mean_frame, well_mask, first_frame):
     cv2.drawContours(first_frame, valid_bubbles, -1, (255,255,0), 3)
 
     return bubble_table, bubble_mask, first_frame
+
+
+def image_subtraction_from_video(median_frame, max_frame, bubble_mask, first_frame):
+
+    # Get tracks by subtracting median from max
+    range_frame = cv2.subtract(max_frame, median_frame)
+
+    # Apply bubble filter
+    range_filtered = cv2.bitwise_and(range_frame, range_frame, mask = bubble_mask)
+
+    # Apply bilateral filter
+    range_blur = cv2.bilateralFilter(range_filtered, 5, 150, 150)
+
+    # Apply automatic threshold
+    _,range_thresh = cv2.threshold(range_blur, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+
+    # Apply dilation
+    kernal = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
+    range_dilate = cv2.dilate(range_thresh, kernal, iterations = 4)
+
+    # Identify track contours
+    track_contours, _ = cv2.findContours(range_dilate, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    valid_tracks = []
+    for cnt in track_contours:
+        if cv2.arcLength(cnt, True) > 150:
+            valid_tracks.append(cnt)
+
+    # Draw track contours on max_image
+    track_image = cv2.cvtColor(max_frame, cv2.COLOR_GRAY2BGR)
+    cv2.drawContours(track_image, valid_tracks, -1, (0,255,0), thickness=1)
+    cv2.drawContours(first_frame, valid_tracks, -1, (255,0,255), thickness=1)
+
+    # Create track mask
+    track_mask = np.zeros_like(median_frame)
+    cv2.drawContours(track_mask, valid_tracks, -1, (255), thickness=cv2.FILLED)
+
+    # Get foreground mask
+    foreground_mask = cv2.bitwise_and(median_frame, median_frame, mask = track_mask)
+
+
+    return foreground_mask, track_mask, track_image, first_frame 
+
+
+def calculate_measurements(contour):
+    """
+        
+    Calculates various particle measurements for a given contour.
+
+    This function calculates properties including the area, perimeter, orientation, aspect ratio, 
+    solidity, eccentricity, and feret diameter for the provided contour.
+
+    Args:
+        contour (ndarray): A contour of a detected candidate particle.
+
+    Returns:
+        list: A list of measurements including X, Y coordinates, area, perimeter, 
+        orientation, aspect ratio, solidity, eccentricity, and feret diameter.
+   
+
+    """
+    # Calculate measurements for a single contour
+    M = cv2.moments(contour)
+    
+    if M["m00"] == 0:
+        return None  # Avoid division by zero
+    
+    # Centroid coordinates, converted to integers
+    cx = int(M["m10"] / M["m00"])
+    cy = int(M["m01"] / M["m00"])
+    
+    # Area and perimeter
+    area = cv2.contourArea(contour)
+    perimeter = cv2.arcLength(contour, True)
+    
+    try:
+        # Ellipse fitting
+        ellipse = cv2.fitEllipse(contour)
+        orientation = ellipse[2]
+        # Calculate eccentricity
+        minor_axis = min(ellipse[1])
+        major_axis = max(ellipse[1])
+        eccentricity = np.sqrt(1 - (minor_axis ** 2) / (major_axis ** 2))
+        axis_ratio = major_axis / minor_axis 
+    except cv2.error as e:
+        # Handling the specific error for insufficient points
+        if "Incorrect size of input array" in str(e):
+            orientation = np.nan
+            eccentricity = np.nan
+            axis_ratio = np.nan
+        else:
+            raise  # Re-raise the exception if it's not the expected one
+    
+    # Aspect ratio of bounding rectangle
+    x, y, w, h = cv2.boundingRect(contour)
+    if (h == 0):
+        aspect_ratio = np.nan
+    elif (w >= h):
+        aspect_ratio = float(w) / h
+    elif (w < h):
+        aspect_ratio = float(h) / w
+
+    # Solidity
+    hull = cv2.convexHull(contour)
+    hull_area = cv2.contourArea(hull)
+    solidity = area / hull_area if hull_area != 0 else np.nan
+    
+    # Feret Diameter
+    (center_EC, radius_EC) = cv2.minEnclosingCircle(np.array(contour))
+    feret_diameter = 2 * radius_EC
+
+    return {
+        'X': cx,
+        'Y': cy,
+        'area': area,
+        'perimeter': perimeter,
+        'orientation': orientation,
+        'aspect_ratio': aspect_ratio,
+        'solidity': solidity,
+        'eccentricity': eccentricity,
+        'feret_diameter': feret_diameter,
+        'bounding_x': x,
+        'bounding_y': y,
+        'bounding_w': w,
+        'bounding_h': h, 
+        'minor_axis': minor_axis, 
+        'major_axis': major_axis, 
+        'axis_ratio': axis_ratio 
+    }
 
 
 def analyze_microorganisms(image):
@@ -446,47 +487,6 @@ def label_particles(image, table_of_particles):
      
     
     return labeled_image
-
-
-def image_subtraction_from_video(median_frame, max_frame, bubble_mask, first_frame):
-
-    # Get tracks by subtracting median from max
-    range_frame = cv2.subtract(max_frame, median_frame)
-
-    # Apply bubble filter
-    range_filtered = cv2.bitwise_and(range_frame, range_frame, mask = bubble_mask)
-
-    # Apply bilateral filter
-    range_blur = cv2.bilateralFilter(range_filtered, 5, 150, 150)
-
-    # Apply automatic threshold
-    _,range_thresh = cv2.threshold(range_blur, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-
-    # Apply dilation
-    kernal = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
-    range_dilate = cv2.dilate(range_thresh, kernal, iterations = 4)
-
-    # Identify track contours
-    track_contours, _ = cv2.findContours(range_dilate, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-    valid_tracks = []
-    for cnt in track_contours:
-        if cv2.arcLength(cnt, True) > 150:
-            valid_tracks.append(cnt)
-
-    # Draw track contours on max_image
-    track_image = cv2.cvtColor(max_frame, cv2.COLOR_GRAY2BGR)
-    cv2.drawContours(track_image, valid_tracks, -1, (0,255,0), thickness=1)
-    cv2.drawContours(first_frame, valid_tracks, -1, (255,0,255), thickness=1)
-
-    # Create track mask
-    track_mask = np.zeros_like(median_frame)
-    cv2.drawContours(track_mask, valid_tracks, -1, (255), thickness=cv2.FILLED)
-
-    # Get foreground mask
-    foreground_mask = cv2.bitwise_and(median_frame, median_frame, mask = track_mask)
-
-
-    return foreground_mask, track_mask, track_image, first_frame 
 
 
 def image_analysis_of_frame(video_path, frame_id, well_mask, track_mask, foreground_mask):
