@@ -178,7 +178,7 @@ def mask_well_area(image, first_frame):
     return mask, first_frame
 
 
-def identify_bubbles(mean_frame, well_mask, first_frame):
+def mask_bubbles(mean_frame, well_mask, first_frame):
     """    
     This function identifies suspected bubbles in the video. 
     It returns a table of the possible bubbles and a mask of the well to block the bubble areas.
