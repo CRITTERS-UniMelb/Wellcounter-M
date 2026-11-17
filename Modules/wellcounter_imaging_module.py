@@ -493,16 +493,14 @@ def label_particles(image, table_of_particles):
         image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
     
     # Define size of circular labels to draw
-    sr_factor = particle_detection_params['search_radius_factor']
-    dp_area = particle_detection_params['default_particle_area']
-    search_radius = round(sr_factor * np.sqrt(dp_area / np.pi))
+    label_radius = particle_detection_params['label_radius']
 
     # Draw circles around each particle
     if not table_of_particles.empty:
         for index, row in table_of_particles.iterrows():
             x, y = int(row['X']), int(row['Y'])
 
-            cv2.circle(image, (x, y), search_radius, (0, 252, 124), thickness=3)    
+            cv2.circle(image, (x, y), label_radius, (0, 252, 124), thickness=3)    
             labeled_image = image
         
     else:

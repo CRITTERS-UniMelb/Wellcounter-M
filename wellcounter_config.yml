@@ -3,8 +3,7 @@ outputs:
 
 particle_detection:
   background_is_dark: true
-  default_particle_area: 200
-  search_radius_factor: 2
+  label_radius: 127
   filter_by_shape: false
   microorganism_blur: 5
   microorganism_threshold_min: 4
