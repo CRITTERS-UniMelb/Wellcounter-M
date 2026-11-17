@@ -601,21 +601,21 @@ def count_particles(video_path):
     first_frame = cv2.cvtColor(first_frame, cv2.COLOR_GRAY2BGR)
 
     # Process video to get minimum, maximum, and mean frames
-    min_frame, max_frame, mean_frame, median_frame = process_summary_frames()(video_path)
+    min_frame, max_frame, mean_frame, median_frame = process_summary_frames(video_path)
 
     # Get well mask
     well_mask, first_frame = mask_well_area(median_frame, first_frame)
 
     # Get bubble mask
-    bubble_table, bubble_mask, first_frame = identify_bubbles(mean_frame, well_mask, first_frame)
+    bubble_table, bubble_mask, first_frame = mask_bubbles(mean_frame, well_mask, first_frame)
 
-    # Get foreground mask and tracks
-    foreground_mask, track_mask, track_image, first_frame = image_subtraction_from_video(median_frame, max_frame, bubble_mask, first_frame)
+    # Get background mask and tracks
+    background_mask, track_mask, track_image, first_frame = mask_tracks(median_frame, max_frame, bubble_mask, first_frame)
 
     # Perform analysis on three different frames (beginning, middle and end of video)    
-    table_of_particles1 = image_analysis_of_frame(video_path, frame1, well_mask, track_mask, foreground_mask)
-    table_of_particles2 = image_analysis_of_frame(video_path, frame2, well_mask, track_mask, foreground_mask)
-    table_of_particles3 = image_analysis_of_frame(video_path, frame3, well_mask, track_mask, foreground_mask)
+    table_of_particles1 = image_analysis_of_frame(video_path, frame1, well_mask, track_mask, background_mask)
+    table_of_particles2 = image_analysis_of_frame(video_path, frame2, well_mask, track_mask, background_mask)
+    table_of_particles3 = image_analysis_of_frame(video_path, frame3, well_mask, track_mask, background_mask)
         
     # Get output directory
     main_dir = os.path.dirname(video_path)
