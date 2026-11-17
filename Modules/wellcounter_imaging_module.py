@@ -142,14 +142,11 @@ def process_summary_frames(video_path):
 def mask_well_area(image, first_frame):
     
     """
-    This function defines an ROI (region of interest) of the size of the well. 
-    All pixels outside the ROI are set to 0 (i.e., dark). 
+    This function creates a mask of the true well area, ignoring the walls.
+    This mask will be used to set all pixels outside the well to 0.
     
-    Note, this function     is called only if the wellcounter_config.yml file is set to:
-        wellplate > _well_mask > True
-        
-    ... and it should only be used if wellplate-holders had been placed on top of 
-    the six-well plates during the recordings.
+    Note, this function is called only if the wellcounter_config.yml file is set to:
+        well_mask = true
         
     """
     
@@ -168,7 +165,7 @@ def mask_well_area(image, first_frame):
     mask = np.zeros_like(image)
     cv2.drawContours(mask, [largest_contour], 0, 1, -1)
 
-    # Annotate the 
+    # Draw the well contour on the first frame for verification
     cv2.drawContours(first_frame, [largest_contour], 0, (0,0,255), 4)
 
     return mask, first_frame
