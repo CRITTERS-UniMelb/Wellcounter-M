@@ -1,26 +1,18 @@
 """
 Script: wc_analyze_one_video
 
-This software is part of the following publication:
-"Wellcounter: Automated High-Throughput Phenotyping for Aquatic Microinvertebrates"
-Methods in Ecology and Evolution
-
-The latest version can be found at https://github.com/cpstelzer/wellcounter
-
 Description:
-This script can be used to count microorganisms and analyze their swimming behavior
-based on a single mp4-movie. 
-
-This script calls several functions of the wellcounter imaging and motion module.
+This script can be used to count microorganisms based on a video file.
+This script calls several functions of the wellcounterM imaging module.
+Outputs will be produced in the same directory as the orginal video.
 
 To use this script, follow these steps:
-1) Copy your mp4-file to the location specified in 'data_dir' (see below)
+1) Copy your video file to the location specified in 'data_dir' (see below)
 2) Enter the name of the video file as 'video_file'
-3) To execute this script:
-    activate the required conda environment by "conda activate wellcount6"
-    in te wellcount6 env, type "python wc_analyze_one_sample.py"
+3) Ensure this file is run in the wellcounterM conda environment
 
- 
+Original code based on that published in "Wellcounter: Automated High-Throughput Phenotyping for Aquatic Microinvertebrates"
+This code has been heavily modified as part of the CRITTERS project.
 """
 
 import os
