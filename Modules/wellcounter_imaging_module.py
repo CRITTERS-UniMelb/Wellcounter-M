@@ -87,19 +87,18 @@ def extract_frame(video_path, delay=0):
     return frame
 
 
-def process_full_video(video_path):
+def process_summary_frames(video_path):
     """
-    This function isolates the minimum, maximum, and mean for each pixel across the full video.
+    This function calculates the minimum, maximum, and mean value for each pixel across the full video.
     
     Args:
         video_path: Filepath for video to be processed.
-        firstframe: Integer for the first frame of the video to be included.
-        lastframe: Integer for the last frame of the video to be included.
 
     Returns:
-        max_frame: Image with the maximum value in any frame of the video
         min_frame: Image with the minimum value in any frame of the video
-        mean_frame: The average frame of the video.
+        max_frame: Image with the maximum value in any frame of the video
+        mean_frame: Image with the average value in any frame of the video
+        median_frame: Image with the median value in any frame of the video
     """
 
     # Open the video file
@@ -113,7 +112,7 @@ def process_full_video(video_path):
     # Get the total number of frames in the video
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     
-    # Get first frame
+    # Get first frame of video
     first_image = extract_frame(video_path, 0)
 
     # Get min, max, and mean frames (using one every 10th second)
@@ -133,7 +132,7 @@ def process_full_video(video_path):
     # Release video
     cap.release()
 
-    # Calculate the median and mean frames
+    # Calculate the median and mean frames using all frames of the video
     median_frame = np.median(frames, axis=0).astype(dtype=np.uint8)    
     mean_frame = np.mean(frames, axis=0).astype(dtype=np.uint8)
 
@@ -590,7 +589,7 @@ def count_particles(video_path):
     first_frame = cv2.cvtColor(first_frame, cv2.COLOR_GRAY2BGR)
 
     # Process video to get minimum, maximum, and mean frames
-    min_frame, max_frame, mean_frame, median_frame = process_full_video(video_path)
+    min_frame, max_frame, mean_frame, median_frame = process_summary_frames()(video_path)
 
     # Get well mask
     well_mask, first_frame = mask_well_area(median_frame, first_frame)
