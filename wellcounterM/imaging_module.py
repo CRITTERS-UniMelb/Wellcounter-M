@@ -264,7 +264,23 @@ def mask_tracks(median_frame, max_frame, bubble_mask, first_frame, use_mask = Tr
         track_mask: A binary mask of the identified tracks (plus well area/bubbles if in config).
         track_image: Image including the full paramecium tracks throughout the video
         first_frame: The first frame of the video with the track contours drawn on it.
+
+    Raises:
+        TypeError: If any frame or mask is not a numpy ndarray, or use_mask is not a boolean.
     """
+
+    # Validate argument types
+    array_args = {
+        'median_frame': median_frame,
+        'max_frame': max_frame,
+        'bubble_mask': bubble_mask,
+        'first_frame': first_frame,
+    }
+    for name, value in array_args.items():
+        if not isinstance(value, np.ndarray):
+            raise TypeError(f"mask_tracks: '{name}' must be a numpy ndarray, got {type(value).__name__}")
+    if not isinstance(use_mask, (bool, np.bool_)):
+        raise TypeError(f"mask_tracks: 'use_mask' must be a boolean, got {type(use_mask).__name__}")
 
     # Get tracks by subtracting median from max
     range_frame = cv2.subtract(max_frame, median_frame)
