@@ -1,2 +1,4 @@
 /**/.DS_Store
 SampleVideos/
+__pycache__/
+*.py[cod]
