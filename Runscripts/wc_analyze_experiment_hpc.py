@@ -1,12 +1,5 @@
-# -*- coding: utf-8 -*-
 """
 Script: wc_analyze_experiment_hpc
-
-This software is part of the following publication:
-"Wellcounter: Automated High-Throughput Phenotyping for Aquatic Microinvertebrates"
-Methods in Ecology and Evolution
-
-The latest version can be found at https://github.com/cpstelzer/wellcounter
 
 Description:
 This script demonstrates the principle of batch-analyzing an entire 
@@ -29,18 +22,16 @@ Key Steps:
 5. Combine the analysis results with the treatment information.
 6. Append the results to an output CSV file.
 
-Author: Claus-Peter Stelzer
-Date: 2025-02-07
-
-Modified by Saoirse Kelleher and Eleanor Stern
-Date: 2025-03-05
-
+Original code based on that published in "Wellcounter: Automated High-Throughput Phenotyping for Aquatic Microinvertebrates"
+This code has been heavily modified as part of the CRITTERS project.
 """
 
 import os
-import pandas as pd
 import sys
-import wellcounter_imaging_module as wim
+
+import pandas as pd
+
+import wellcounterM
 
 # Ingest arguments from spartan
 experiment = sys.argv[1]
@@ -81,7 +72,7 @@ for video in video_files: # Iterate through each batch, plate and well
     video_path = os.path.join("/data/scratch/projects/punim2588/",data_dir, video)
         
     # Calculate avg. number of organisms based on three frames of the video
-    count_df = wim.count_particles(video_path)      
+    count_df = wellcounterM.count_particles(video_path)      
         
     # Perform analysis of movement behavior
     vidname = os.path.splitext(video)[0]
