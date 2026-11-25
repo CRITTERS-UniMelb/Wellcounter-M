@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Wellcounter optimization module
 
@@ -6,28 +5,20 @@ This software is part of the following publication:
 "Wellcounter: Automated High-Throughput Phenotyping for Aquatic Microinvertebrates"
 Methods in Ecology and Evolution
 
-The latest version can be found at https://github.com/cpstelzer/wellcounter
-
-
 Description:
 This module is designed to automate the optimization of imaging parameters 
-for detecting microorganisms recorded with the WELLCOUNTER. 
+for detecting microorganisms recorded with Wellcounter. 
 
-The module includes functions for reading and writing the WELLCOUNTER 
+The module includes functions for reading and writing the Wellcounter 
 configuration file, backing up and restoring configurations, calculating 
 performance metrics, and performing batch optimization of imaging parameters. 
 
 Note: Optimization parameters, e.g., the path to the training data, have to be 
-set in the WELLCOUNTER configuration file (wellcounter_config.yml)
+set in the Wellcounter configuration file (wellcounter_config.yml)
 
-Note: Portions of the code in this file were generated using ChatGPT v4.0.
-      All AI-generated content has been rigorously validated and tested by the 
-      authors. The corresponding author accepts full responsibility for the 
-      AI-assisted portions of the code.
 
-Author: Claus-Peter Stelzer
-Date: 2025-02-07
-
+Original code based on that published in "Wellcounter: Automated High-Throughput Phenotyping for Aquatic Microinvertebrates"
+This code has been heavily modified as part of the CRITTERS project.
 """
 
 import pandas as pd
