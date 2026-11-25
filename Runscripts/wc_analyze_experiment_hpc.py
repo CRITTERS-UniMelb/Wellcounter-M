@@ -46,8 +46,8 @@ outpath = "Outputs/Experiment_" + str(experiment) + "_" + str(split) + ".csv" # 
 os.system('mkdir ' + '/data/scratch/projects/punim2588/' + data_dir)
 
 # Read txt of videos for this experiment
-index = open("ExperimentIndex/Experiment_" + str(experiment) + ".txt")
-experiment_videos = index.readlines()
+with open("ExperimentIndex/Experiment_" + str(experiment) + ".txt") as index:
+    experiment_videos = index.readlines()
 
 # Get video paths for this split
 split_paths = experiment_videos[(split*10):((split*10)+10)]
