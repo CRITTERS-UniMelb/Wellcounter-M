@@ -32,6 +32,7 @@ import yaml
 
 import wellcounterM
 
+logger = logging.getLogger(__name__)
 
 def read_config(config_path="wellcounter_config.yml"):
     """
@@ -42,7 +43,7 @@ def read_config(config_path="wellcounter_config.yml"):
             config = yaml.load(config_file, Loader=yaml.FullLoader)
         return config
     except Exception as e:
-        logging.error(f"Error reading config file: {e}")
+        logger.error(f"Error reading config file: {e}")
         raise
 
 def write_config(config, config_path="wellcounter_config.yml"):
@@ -53,7 +54,7 @@ def write_config(config, config_path="wellcounter_config.yml"):
         with open(config_path, "w") as config_file:
             yaml.dump(config, config_file)
     except Exception as e:
-        logging.error(f"Error writing config file: {e}")
+        logger.error(f"Error writing config file: {e}")
         raise
 
 def backup_config(config_path="wellcounter_config.yml"):
@@ -64,7 +65,7 @@ def backup_config(config_path="wellcounter_config.yml"):
             yaml.dump(config, temp_file)
         return temp_file.name
     except Exception as e:
-        logging.error(f"Error backing up config: {e}")
+        logger.error(f"Error backing up config: {e}")
         raise
 
 
@@ -73,9 +74,8 @@ def restore_config(backup_file, config_path="wellcounter_config.yml"):
         shutil.copy(backup_file, config_path)
         os.remove(backup_file)
     except Exception as e:
-        logging.error(f"Error restoring config: {e}")
+        logger.error(f"Error restoring config: {e}")
         raise
-        
    
 
 def calculate_performance_metrics(df):
@@ -124,9 +124,7 @@ def calculate_performance_metrics(df):
 
     print("Performance_metrics:")
     print(df_metrics)
-    print("")
     print("-----------------")
-    print("")
 
     return df_metrics
 
@@ -213,7 +211,7 @@ def evaluate_imaging_parameters(training_path='E:/'):
         return performance_metrics, comparison_df
 
     except Exception as e:
-        logging.error(f"Error in evaluate_imaging_parameters: {e}")
+        logger.error(f"Error in evaluate_imaging_parameters: {e}")
         raise
     
 def batch_optimizer(config_path="wellcounter_config.yml"):
@@ -233,13 +231,13 @@ def batch_optimizer(config_path="wellcounter_config.yml"):
     # Function to append configuration to log
     def append_config_to_log():
         # Log a separator and some whitespace for readability
-        logging.info("\n" + '-'*40 + "\n")
+        logger.info("\n" + '-'*40 + "\n")
         
         # Convert the config dictionary to a YAML-formatted string
         formatted_config = yaml.dump(config, default_flow_style=False, sort_keys=False)
         
         # Log the formatted configuration
-        logging.info("Configuration Settings:\n" + formatted_config)
+        logger.info("Configuration Settings:\n" + formatted_config)
         
         
     
@@ -303,13 +301,14 @@ def batch_optimizer(config_path="wellcounter_config.yml"):
                     
                     iterations_completed += 1
                     progress_percentage = (iterations_completed / total_iterations) * 100
-                    logging.info(f"Batch optimization progress: {progress_percentage:.2f}% completed")
+                    logger.info(f"Batch optimization progress: {progress_percentage:.2f}% completed")
 
                 except Exception as e:
-                    logging.error(f"Error in optimizing parameters at threshold {threshold} and area {area}: {e}")
+                    logger.error(f"Error in optimizing parameters at threshold {threshold} and area {area}: {e}")
                     print(f"Error in optimizing parameters at threshold {threshold} and area {area}: {e}")
+                    raise
 
-    logging.info("Batch optimization completed and results saved.")    
+    logger.info("Batch optimization completed and results saved.")    
     restore_config(temp_file_path)
     
     # Save wellcounter-configuration file to log
