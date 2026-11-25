@@ -21,15 +21,17 @@ Original code based on that published in "Wellcounter: Automated High-Throughput
 This code has been heavily modified as part of the CRITTERS project.
 """
 
-import pandas as pd
-import os
-import numpy as np
-import yaml
-import tempfile
-import shutil
-import wellcounter_imaging_module as wim
 import logging
-from datetime import date   
+import os
+import shutil
+import tempfile
+from datetime import date
+
+import numpy as np
+import pandas as pd
+import yaml
+
+import wellcounterM
 
 
 def read_config(config_path="wellcounter_config.yml"):
@@ -171,7 +173,7 @@ def evaluate_imaging_parameters(training_path='E:/'):
             video_path = os.path.join(training_path, video_file)
             
             # Perform image analysis with the current parameter settings
-            table_of_particles = wim.image_analysis_of_sample(video_path)
+            table_of_particles = wellcounterM.image_analysis_of_sample(video_path)
             
             # Navigate to and read the ground truth particle data
             # Remove the .mp4 extension from the video file name
@@ -188,7 +190,7 @@ def evaluate_imaging_parameters(training_path='E:/'):
             validated_particles = pd.read_csv(csv_path)
                         
             # Match particles detected by image analysis to "true" particles by their position
-            comparison_particles = wim.compare_detected_particles(validated_particles, table_of_particles)
+            comparison_particles = wellcounterM.compare_detected_particles(validated_particles, table_of_particles)
             
             # Collect data across different samples
             comparison_df = pd.concat([comparison_df, comparison_particles], ignore_index=True) if not comparison_df.empty else comparison_particles
