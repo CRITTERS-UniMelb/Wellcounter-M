@@ -51,7 +51,7 @@ for video in video_files: # Iterate through each batch, plate and well
     video_path = os.path.join(data_dir, video)
         
     # Calculate avg. number of organisms based on three frames of the video
-    count_df = wellcounterM.count_particles(video_path)      
+    count_df, _ = wellcounterM.count_particles(video_path)      
         
     vidname = os.path.splitext(video)[0]
     treat_df = pd.DataFrame([vidname])       
