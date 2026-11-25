@@ -25,7 +25,7 @@ video_file = "2025_05_21_14_45_Temp27_Conc010_Col2_Well2.avi"
 video_path = os.path.join(data_dir, video_file)
 
 # Calculate avg. number of organisms based on three frames of the video
-count_df = wellcounterM.count_particles(video_path)
+count_df, tops = wellcounterM.count_particles(video_path)
 
 # Print the results
 print("Analysis of ", video_file, "complete:")

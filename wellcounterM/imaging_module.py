@@ -688,8 +688,11 @@ def count_particles(video_path):
         'median_particle_size': [median_particle_area], # pixels/frame
         'bubbles': bubble_count,
     })
-    
-    return summary_df
+
+    # Create list of tables of particles to return
+    tables_of_particles = [table_of_particles1, table_of_particles2, table_of_particles3]
+
+    return summary_df, tables_of_particles
     
 
 
