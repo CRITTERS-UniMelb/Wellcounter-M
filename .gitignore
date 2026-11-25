@@ -2,3 +2,4 @@
 SampleVideos/
 __pycache__/
 *.py[cod]
+Runscripts/wc_analyze_experiment_hpc.py
