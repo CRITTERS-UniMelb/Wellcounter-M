@@ -25,6 +25,7 @@ import logging
 import os
 import shutil
 import tempfile
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -265,7 +266,7 @@ def batch_optimizer(config_path="wellcounter_config.yml"):
     iterations_completed = 0
 
     # Open or create the output files for writing
-    outpath_csv_query = os.path.join(output_folder, f'optimize_imaging_parameters_{current_date}.csv')
+    outpath_csv_query = os.path.join(output_folder, f'optimize_imaging_parameters_{date.today()}.csv')
     
     # Ensure the DataFrame is written to the file as it is being updated
     with open(outpath_csv_query, 'w') as outfile:
