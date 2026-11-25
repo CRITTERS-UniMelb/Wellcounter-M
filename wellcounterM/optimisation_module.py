@@ -171,7 +171,8 @@ def evaluate_imaging_parameters(training_path='E:/'):
             video_path = os.path.join(training_path, video_file)
             
             # Perform image analysis with the current parameter settings
-            table_of_particles = wellcounterM.image_analysis_of_sample(video_path)
+            _, tops = wellcounterM.count_particles(video_path)
+            table_of_particles = tops[0]
             
             # Navigate to and read the ground truth particle data
             # Remove the .mp4 extension from the video file name
