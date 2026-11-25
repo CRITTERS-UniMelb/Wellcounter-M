@@ -25,7 +25,6 @@ import logging
 import os
 import shutil
 import tempfile
-from datetime import date
 
 import numpy as np
 import pandas as pd
